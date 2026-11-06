@@ -1,0 +1,35 @@
+name: iOS Compile Check
+
+on:
+  push:
+    branches: [ios-port]
+  workflow_dispatch:
+
+jobs:
+  check:
+    runs-on: macos-15
+    timeout-minutes: 60
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: "1.90"
+          targets: aarch64-apple-ios
+
+      - uses: Swatinem/rust-cache@v2
+        with:
+          key: ios-check
+
+      - name: cargo check for iOS
+        run: |
+          cargo check \
+            --target aarch64-apple-ios \
+            -p horizon-client \
+            2>&1 | tee compile-errors.txt || true
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: compile-errors
+          path: compile-errors.txt
