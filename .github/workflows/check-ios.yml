@@ -15,7 +15,7 @@ jobs:
 
       - uses: dtolnay/rust-toolchain@stable
         with:
-          toolchain: "1.90"
+          toolchain: "stable"
           targets: aarch64-apple-ios
 
       - uses: Swatinem/rust-cache@v2
