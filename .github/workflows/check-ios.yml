@@ -27,7 +27,16 @@ jobs:
           cargo check \
             --target aarch64-apple-ios \
             -p horizon-client \
+            --no-default-features \
+            --features "metal" \
             2>&1 | tee compile-errors.txt || true
+
+      - name: Dump horizon-client Cargo.toml
+        run: |
+          cat crates/horizon-client/Cargo.toml 2>/dev/null \
+            || find . -name "Cargo.toml" | xargs grep -l "horizon-client" | head -5
+            # Cũng dump workspace Cargo.toml
+          cat Cargo.toml
 
       - uses: actions/upload-artifact@v4
         with:
