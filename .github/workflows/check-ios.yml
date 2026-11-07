@@ -15,30 +15,47 @@ jobs:
 
       - uses: dtolnay/rust-toolchain@stable
         with:
-          toolchain: "stable"
+          toolchain: stable
           targets: aarch64-apple-ios
 
       - uses: Swatinem/rust-cache@v2
         with:
           key: ios-check
 
+      - name: Dump Cargo.tomls
+        run: |
+          echo "=== WORKSPACE ===" && cat Cargo.toml
+          echo ""
+          echo "=== horizon-client ==="
+          find . -path "*/horizon-client/Cargo.toml" -not -path "*/target/*" | xargs cat
+          echo ""
+          echo "=== ALL CRATES ==="
+          find . -name "Cargo.toml" -not -path "*/target/*" | sort | xargs -I{} sh -c 'echo "--- {} ---" && cat {}'
+        continue-on-error: true
+
+      - name: Dump Cargo.tomls to file
+        run: |
+          {
+            echo "=== WORKSPACE ==="
+            cat Cargo.toml
+            echo ""
+            echo "=== horizon-client ==="
+            find . -path "*/horizon-client/Cargo.toml" -not -path "*/target/*" | xargs cat
+            echo ""
+            echo "=== ALL CRATES ==="
+            find . -name "Cargo.toml" -not -path "*/target/*" | sort | xargs -I{} sh -c 'echo "--- {} ---" && cat {}'
+          } > cargo-tomls.txt 2>&1
+
       - name: cargo check for iOS
         run: |
           cargo check \
             --target aarch64-apple-ios \
             -p horizon-client \
-            --no-default-features \
-            --features "metal" \
             2>&1 | tee compile-errors.txt || true
-
-      - name: Dump horizon-client Cargo.toml
-        run: |
-          cat crates/horizon-client/Cargo.toml 2>/dev/null \
-            || find . -name "Cargo.toml" | xargs grep -l "horizon-client" | head -5
-            # Cũng dump workspace Cargo.toml
-          cat Cargo.toml
 
       - uses: actions/upload-artifact@v4
         with:
           name: compile-errors
-          path: compile-errors.txt
+          path: |
+            compile-errors.txt
+            cargo-tomls.txt
