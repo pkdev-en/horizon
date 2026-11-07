@@ -43,8 +43,16 @@ horizon-narrator = { path = "../horizon-narrator" }
 # Horizon mods: sandboxed WebAssembly components, off unless installed and turned on (docs/mods.md).
 # Their runtime is the `mods` feature.
 horizon-mods = { path = "../horizon-mods", default-features = false, features = ["index"] }
+[target.'cfg(not(target_os = "ios"))'.dependencies]
 wgpu = { version = "30.0.1", default-features = false, features = ["std", "parking_lot", "vulkan", "metal", "wgsl", "naga-ir"] }
+
+[target.'cfg(target_os = "ios")'.dependencies]
+wgpu = { version = "30.0.1", default-features = false, features = ["std", "parking_lot", "metal", "wgsl", "naga-ir"] }
+[target.'cfg(not(target_os = "ios"))'.dependencies]
 winit = "0.30.13"
+
+[target.'cfg(target_os = "ios")'.dependencies]
+winit = { version = "0.30.13", default-features = false, features = ["rwh_06"] }
 pollster = "0.4"
 bytemuck = { version = "1.24", features = ["derive"] }
 glam = "0.30"
